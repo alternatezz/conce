@@ -1,68 +1,109 @@
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import ttk, messagebox
 import requests
 
 class ConcessionariaApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Concessionária")
+        self.root.geometry("800x600")
+        self.root.minsize(600, 400)
+        self.root.maxsize(1200, 900)
+        self.style = ttk.Style()
+        self.style.configure('TButton', font=('Helvetica', 12), padding=5)
+        self.style.configure('TLabel', font=('Helvetica', 12), padding=5)
+        self.style.configure('TEntry', font=('Helvetica', 12), padding=5)
+        self.style.configure('Title.TLabel', font=('Helvetica', 24, 'bold'), padding=10)
+        self.style.configure('Info.TLabel', font=('Helvetica', 14), padding=5)
+        self.style.configure('Accent.TButton', font=('Helvetica', 12, 'bold'), padding=10, foreground='black', background='#4CAF50')
+        self.style.map('Accent.TButton', foreground=[('active', 'black')], background=[('active', '#45a049')])
+        self.style.configure('Warning.TLabel', foreground='red')
+
         self.create_choice_widgets()
 
     def create_choice_widgets(self):
         self.clear_widgets()
-        self.choice_label = tk.Label(self.root, text="Escolha seu perfil:")
-        self.choice_label.pack()
 
-        self.comprador_button = tk.Button(self.root, text="Comprador", command=self.create_comprador_widgets)
-        self.comprador_button.pack()
+        title_label = ttk.Label(self.root, text="Escolha seu perfil:", style='Title.TLabel')
+        title_label.pack(pady=20)
 
-        self.vendedor_button = tk.Button(self.root, text="Vendedor", command=self.create_vendedor_widgets)
-        self.vendedor_button.pack()
+        comprador_button = ttk.Button(self.root, text="Comprador", style='Accent.TButton', command=self.create_comprador_widgets)
+        comprador_button.pack(pady=10)
+
+        vendedor_button = ttk.Button(self.root, text="Vendedor", style='Accent.TButton', command=self.create_vendedor_widgets)
+        vendedor_button.pack(pady=10)
 
     def create_comprador_widgets(self):
         self.clear_widgets()
-        self.carros_listbox = tk.Listbox(self.root)
-        self.carros_listbox.pack()
 
-        self.cliente_nome_entry = tk.Entry(self.root)
-        self.cliente_nome_entry.pack()
-        self.cliente_nome_entry.insert(0, "Nome do Cliente")
+        title_label = ttk.Label(self.root, text="Comprador", style='Title.TLabel')
+        title_label.pack(pady=20)
 
-        self.registrar_venda_button = tk.Button(self.root, text="Registrar Venda", command=self.registrar_venda)
-        self.registrar_venda_button.pack()
+        carros_frame = ttk.Frame(self.root)
+        carros_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
 
-        self.voltar_button = tk.Button(self.root, text="Voltar", command=self.create_choice_widgets)
-        self.voltar_button.pack()
+        carros_label = ttk.Label(carros_frame, text="Lista de Carros Disponíveis:", style='Info.TLabel')
+        carros_label.pack(pady=5)
+
+        scrollbar = ttk.Scrollbar(carros_frame, orient=tk.VERTICAL)
+        self.carros_listbox = tk.Listbox(carros_frame, yscrollcommand=scrollbar.set)
+        scrollbar.config(command=self.carros_listbox.yview)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.carros_listbox.pack(fill=tk.BOTH, expand=True)
+
+        cliente_frame = ttk.Frame(self.root)
+        cliente_frame.pack(pady=10)
+
+        cliente_nome_label = ttk.Label(cliente_frame, text="Nome do Cliente:", style='Info.TLabel')
+        cliente_nome_label.grid(row=0, column=0, padx=5)
+
+        self.cliente_nome_entry = ttk.Entry(cliente_frame)
+        self.cliente_nome_entry.grid(row=0, column=1, padx=5)
+
+        registrar_venda_button = ttk.Button(cliente_frame, text="Registrar Venda", style='Accent.TButton', command=self.registrar_venda)
+        registrar_venda_button.grid(row=0, column=2, padx=5)
+
+        voltar_button = ttk.Button(cliente_frame, text="Voltar", style='Accent.TButton', command=self.create_choice_widgets)
+        voltar_button.grid(row=0, column=3, padx=5)
 
         self.listar_carros()
 
     def create_vendedor_widgets(self):
         self.clear_widgets()
-        tk.Label(self.root, text="Marca:").pack()
-        self.marca_entry = tk.Entry(self.root)
-        self.marca_entry.pack()
 
-        tk.Label(self.root, text="Modelo:").pack()
-        self.modelo_entry = tk.Entry(self.root)
-        self.modelo_entry.pack()
+        title_label = ttk.Label(self.root, text="Vendedor", style='Title.TLabel')
+        title_label.pack(pady=20)
 
-        tk.Label(self.root, text="Ano:").pack()
-        self.ano_entry = tk.Entry(self.root)
-        self.ano_entry.pack()
+        info_frame = ttk.Frame(self.root)
+        info_frame.pack(pady=10)
 
-        tk.Label(self.root, text="Preço:").pack()
-        self.preco_entry = tk.Entry(self.root)
-        self.preco_entry.pack()
+        ttk.Label(info_frame, text="Preencha as informações do carro:", style='Info.TLabel').grid(row=0, column=0, columnspan=2, pady=5)
 
-        tk.Label(self.root, text="Cor:").pack()
-        self.cor_entry = tk.Entry(self.root)
-        self.cor_entry.pack()
+        ttk.Label(info_frame, text="Marca:", style='Info.TLabel').grid(row=1, column=0, pady=5)
+        self.marca_entry = ttk.Entry(info_frame)
+        self.marca_entry.grid(row=1, column=1, pady=5)
 
-        self.cadastrar_carro_button = tk.Button(self.root, text="Cadastrar Carro", command=self.cadastrar_carro)
-        self.cadastrar_carro_button.pack()
+        ttk.Label(info_frame, text="Modelo:", style='Info.TLabel').grid(row=2, column=0, pady=5)
+        self.modelo_entry = ttk.Entry(info_frame)
+        self.modelo_entry.grid(row=2, column=1, pady=5)
 
-        self.voltar_button = tk.Button(self.root, text="Voltar", command=self.create_choice_widgets)
-        self.voltar_button.pack()
+        ttk.Label(info_frame, text="Ano:", style='Info.TLabel').grid(row=3, column=0, pady=5)
+        self.ano_entry = ttk.Entry(info_frame)
+        self.ano_entry.grid(row=3, column=1, pady=5)
+
+        ttk.Label(info_frame, text="Preço:", style='Info.TLabel').grid(row=4, column=0, pady=5)
+        self.preco_entry = ttk.Entry(info_frame)
+        self.preco_entry.grid(row=4, column=1, pady=5)
+
+        ttk.Label(info_frame, text="Cor:", style='Info.TLabel').grid(row=5, column=0, pady=5)
+        self.cor_entry = ttk.Entry(info_frame)
+        self.cor_entry.grid(row=5, column=1, pady=5)
+
+        vendedor_button = ttk.Button(info_frame, text="Cadastrar Carro", style='Accent.TButton', command=self.cadastrar_carro)
+        vendedor_button.grid(row=6, column=0, columnspan=2, pady=10)
+
+        voltar_button = ttk.Button(info_frame, text="Voltar", style='Accent.TButton', command=self.create_choice_widgets)
+        voltar_button.grid(row=7, column=0, columnspan=2, pady=10)
 
     def clear_widgets(self):
         for widget in self.root.winfo_children():
@@ -85,7 +126,7 @@ class ConcessionariaApp:
 
         carro_id = selected_car.split(' - ')[0]
         cliente_nome = self.cliente_nome_entry.get()
-        if not cliente_nome or cliente_nome == "Nome do Cliente":
+        if not cliente_nome:
             messagebox.showwarning("Atenção", "Insira o nome do cliente")
             return
 
